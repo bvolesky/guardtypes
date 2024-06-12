@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guardtypes"
+version = "0.1.0"
+description = "Enforces type annotations at runtime"
+authors = [
+    { name = "Brandon Volesky"}
+]
+
+[tool.setuptools]
+packages = ["guardtypes"]
