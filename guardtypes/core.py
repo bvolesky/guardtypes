@@ -1,29 +1,15 @@
 """
-Type Enforcement Decorator Module
+Module for enforcing type annotations at runtime.
 
-This module provides a decorator `enforce` that ensures the types of arguments
-and return values of functions match their type annotations. It evaluates
-annotations even if they are specified as strings, allowing for forward
-references and dynamic type checks.
-
-Usage:
-    import guardtypes
-
-    @guardtypes.enforce
-    def example_function(arg1: int, arg2: str) -> bool:
-        return arg1 > 0 and arg2.isalpha()
-
-    example_function(1, "test")  # Works
-    example_function(1, 123)     # Raises TypeError
+This module provides a decorator, `enforce`, that can be used to enforce
+type annotations on function arguments and return values. It utilizes
+Python's type hints to check that arguments passed to a function and
+the values returned by the function match the specified types. If a type
+mismatch is detected, a `TypeError` is raised.
 
 Functions:
-    - enforce(func: Callable) -> Callable:
-        A decorator that enforces type annotations for the decorated function.
-
-Imports:
-    - inspect: To retrieve the signature of the function and bind arguments.
-    - functools: To preserve the metadata of the original function.
-    - typing: To use typing hints like Any and Callable for documentation.
+    enforce(func: Callable) -> Callable:
+        A decorator that enforces type annotations for the given function.
 """
 
 import inspect

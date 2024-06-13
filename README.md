@@ -1,20 +1,20 @@
-# guardtypes ⚡
+# guardtypes
 
-`guardtypes` is a package that enforces type annotations at runtime. It ensures that the arguments and return values of a function match the specified types.
+`guardtypes` is a Python library that enforces type annotations at runtime. It provides a decorator, `enforce`, that checks the types of function arguments and return values against their type hints, raising a `TypeError` if a mismatch is found.
 
 ## Installation
 
-To install `guardtypes`, clone the repository and install the package:
+To install `guardtypes`, use pip:
 
-```bash
-git clone https://github.com/bvolesky/guardtypes.git
-cd guardtypes
-pip install .
+```sh
+pip install guardtypes
 ```
 
 ## Usage
 
-To use the `guardtypes` decorator, simply import it and apply it to your function:
+### Basic Example
+
+The `enforce` decorator can be used to enforce type annotations on function arguments and return values.
 
 ```python
 import guardtypes
@@ -29,7 +29,9 @@ def add(a: int, b: int) -> int:
 add(1, '2')
 ```
 
-The `guardtypes` decorator also handles local context, allowing you to use class types within the same function:
+### Handling Local Context
+
+The `guardtypes` decorator also handles local context, allowing you to use class types within the same function.
 
 ```python
 import guardtypes
@@ -51,3 +53,7 @@ cat = Cat.create("Whiskers")
 # This will raise a TypeError because 'name' should be a str
 cat = Cat.create(123)
 ```
+
+## License
+
+This project is licensed under the MIT License.
