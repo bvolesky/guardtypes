@@ -17,10 +17,10 @@ pip install guardtypes
 The `enforce` decorator can be used to enforce type annotations on function arguments and return values.
 
 ```python
-import guardtypes
+from guardtypes import enforce
 
 
-@guardtypes.enforce
+@enforce
 def add(a: int, b: int) -> int:
     return a + b
 
@@ -34,7 +34,7 @@ add(1, '2')
 The `guardtypes` decorator also handles local context, allowing you to use class types within the same function.
 
 ```python
-import guardtypes
+from guardtypes import enforce
 
 
 class Cat:
@@ -42,7 +42,7 @@ class Cat:
         self.name = name
 
     @staticmethod
-    @guardtypes.enforce
+    @enforce
     def create(name: str) -> 'Cat':
         return Cat(name)
 

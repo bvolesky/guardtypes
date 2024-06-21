@@ -39,7 +39,7 @@ def enforce(func: Callable) -> Callable:
         context.update(frame.f_locals)  # type: ignore
         annotations = get_type_hints(func, context)
 
-        def check_type(value, expected_type):
+        def check_type(value, expected_type, param_name="Value"):
             if expected_type is Any:
                 return
             if isinstance(expected_type, _GenericAlias):
@@ -47,19 +47,19 @@ def enforce(func: Callable) -> Callable:
                 if origin is Union:
                     if not any(isinstance(value, t) for t in expected_type.__args__):
                         raise TypeError(
-                            f"Value must be {expected_type}, got {type(value)}"
+                            f"{param_name} must be {expected_type}, got {type(value)}"
                         )
                 elif origin in (list, List):
                     if not isinstance(value, (list, List)) or not all(
                         isinstance(item, expected_type.__args__[0]) for item in value
                     ):
                         raise TypeError(
-                            f"Value must be {expected_type}, got {type(value)}"
+                            f"{param_name} must be {expected_type}, got {type(value)}"
                         )
                 elif origin in (tuple, Tuple):
                     if not isinstance(value, (tuple, Tuple)):
                         raise TypeError(
-                            f"Value must be {expected_type}, got {type(value)}"
+                            f"{param_name} must be {expected_type}, got {type(value)}"
                         )
                     if expected_type.__args__ and expected_type.__args__[1] is Ellipsis:
                         if not all(
@@ -67,15 +67,15 @@ def enforce(func: Callable) -> Callable:
                             for item in value
                         ):
                             raise TypeError(
-                                f"Value must be {expected_type}, got {type(value)}"
+                                f"{param_name} must be {expected_type}, got {type(value)}"
                             )
                     else:
                         if len(value) != len(expected_type.__args__):
                             raise TypeError(
-                                f"Value must be {expected_type}, got {type(value)}"
+                                f"{param_name} must be {expected_type}, got {type(value)}"
                             )
                         for item, subtype in zip(value, expected_type.__args__):
-                            check_type(item, subtype)
+                            check_type(item, subtype, param_name)
                 elif origin in (dict, Dict):
                     key_type, val_type = expected_type.__args__
                     if not all(
@@ -83,26 +83,28 @@ def enforce(func: Callable) -> Callable:
                         for k, v in value.items()
                     ):
                         raise TypeError(
-                            f"Value must be {expected_type}, got {type(value)}"
+                            f"{param_name} must be {expected_type}, got {type(value)}"
                         )
                 elif origin in (set, Set, frozenset, FrozenSet):
                     if not all(
                         isinstance(item, expected_type.__args__[0]) for item in value
                     ):
                         raise TypeError(
-                            f"Value must be {expected_type}, got {type(value)}"
+                            f"{param_name} must be {expected_type}, got {type(value)}"
                         )
             elif not isinstance(value, expected_type):
-                raise TypeError(f"Value must be {expected_type}, got {type(value)}")
+                raise TypeError(
+                    f"{param_name} must be {expected_type}, got {type(value)}"
+                )
 
         for name, value in bound_args.arguments.items():
             if name in annotations:
-                check_type(value, annotations[name])
+                check_type(value, annotations[name], name)
 
         result = func(*args, **kwargs)
 
         if "return" in annotations:
-            check_type(result, annotations["return"])
+            check_type(result, annotations["return"], "return value")
 
         return result
 

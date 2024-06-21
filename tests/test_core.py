@@ -2,45 +2,45 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
 
-import guardtypes
+from guardtypes import enforce
 
 
 class TestTypingTypes:
-    @guardtypes.enforce
+    @enforce
     def process_list(self, items: List[int]) -> int:
         return sum(items)
 
-    @guardtypes.enforce
+    @enforce
     def accept_any(self, value: Any) -> str:
         return str(value)
 
-    @guardtypes.enforce
+    @enforce
     def manage_dict(self, data: Dict[str, int]) -> int:
         return sum(data.values())
 
-    @guardtypes.enforce
+    @enforce
     def handle_optional(self, value: Optional[int]) -> int:
         return value if value is not None else 0
 
-    @guardtypes.enforce
+    @enforce
     def process_union(self, value: Union[int, str]) -> str:
         return str(value)
 
-    @guardtypes.enforce
+    @enforce
     def handle_tuple(self, value: Tuple[int, ...]) -> int:
         return sum(value)
 
-    @guardtypes.enforce
+    @enforce
     def check_type(self, expected_type: Type, value: Any) -> bool:
         if not isinstance(value, expected_type):
             raise TypeError(f"Expected type {expected_type}, got {type(value)}")
         return True
 
-    @guardtypes.enforce
+    @enforce
     def func_with_fixed_length_tuple(self, a: Tuple[int, str, float]):
         return f"{a[0]}, {a[1]}, {a[2]}"
 
-    @guardtypes.enforce
+    @enforce
     def func_with_tuple_arg(self, a: Tuple[int, int]):
         return sum(a)
 
@@ -128,15 +128,15 @@ class TestTypingTypes:
 
 
 class TestEnforce:
-    @guardtypes.enforce
+    @enforce
     def add(self, a: int, b: int) -> int:
         return a + b
 
-    @guardtypes.enforce
+    @enforce
     def concat(self, a: str, b: str) -> str:
         return a + b
 
-    @guardtypes.enforce
+    @enforce
     def repeat(self, s: str, n: int) -> str:
         return s * n
 
@@ -165,7 +165,7 @@ class TestEnforce:
         assert self.add(2, 3) == 5
 
     def test_return_type_incorrect(self):
-        @guardtypes.enforce
+        @enforce
         def add_incorrect_return(a: int, b: int) -> str:
             return a + b  # type: ignore
 
@@ -174,11 +174,11 @@ class TestEnforce:
 
     def test_decorate_class_methods(self):
         class Calculator:
-            @guardtypes.enforce
+            @enforce
             def add(self, a: int, b: int) -> int:
                 return a + b
 
-            @guardtypes.enforce
+            @enforce
             def subtract(self, a: int, b: int) -> int:
                 return a - b
 
@@ -190,7 +190,7 @@ class TestEnforce:
     def test_decorate_static_methods(self):
         class StringUtils:
             @staticmethod
-            @guardtypes.enforce
+            @enforce
             def join_strings(a: str, b: str) -> str:
                 return a + b
 
@@ -204,7 +204,7 @@ class TestEnforce:
             factor = 2
 
             @classmethod
-            @guardtypes.enforce
+            @enforce
             def multiply(cls, x: int) -> int:
                 return cls.factor * x
 
@@ -218,7 +218,7 @@ class TestEnforce:
             def __init__(self, name: str):
                 self.name = name
 
-        @guardtypes.enforce
+        @enforce
         def create_dog(name: str) -> Dog:
             return Dog(name)
 
@@ -228,7 +228,7 @@ class TestEnforce:
             create_dog(123)
 
     def test_function_with_string_annotation(self):
-        @guardtypes.enforce
+        @enforce
         def function_with_string_annotation(a: "int", b: "str") -> "bool":
             return isinstance(a, int) and isinstance(b, str)
 
@@ -246,12 +246,12 @@ class TestEnforce:
                 self.name = name
 
             @staticmethod
-            @guardtypes.enforce
+            @enforce
             def create(name: str) -> "Cat":
                 return Cat(name)
 
             @staticmethod
-            @guardtypes.enforce
+            @enforce
             def incorrect_create(name: int) -> "Cat":
                 return Cat(str(name))
 
@@ -267,3 +267,38 @@ class TestEnforce:
         cat_instance = Cat.incorrect_create(123)
         assert isinstance(cat_instance, Cat)
         assert cat_instance.name == "123"
+
+
+class TestParamName:
+    @enforce
+    def func_with_type_checks(self, a: int, b: str) -> bool:
+        return a > 0 and b.isalpha()
+
+    def test_enforce_decorator(self):
+        instance = TestParamName()
+
+        # Test with valid inputs
+        assert instance.func_with_type_checks(1, "hello")
+
+        # Test with invalid type for 'a'
+        with pytest.raises(
+            TypeError, match="a must be <class 'int'>, got <class 'str'>"
+        ):
+            instance.func_with_type_checks("not an int", "hello")
+
+        # Test with invalid type for 'b'
+        with pytest.raises(
+            TypeError, match="b must be <class 'str'>, got <class 'int'>"
+        ):
+            instance.func_with_type_checks(1, 123)
+
+        # Test with invalid return type
+        @enforce
+        def invalid_return_type(a: int, b: str) -> str:
+            return 42  # type: ignore
+
+        with pytest.raises(
+            TypeError,
+            match="return value must be <class 'str'>, got <class 'int'>",
+        ):
+            invalid_return_type(1, "hello")
